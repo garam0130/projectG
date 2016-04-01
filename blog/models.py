@@ -1,34 +1,25 @@
 from django.db import models
 from django.conf import settings
-from django.utils import timezone
+from django.core.urlresolvers import reverse
+
 # Create your models here.
-class Spot(models.Model):
-    name = models.CharField(max_length=100)
-    content = models.TextField()
-    photo = models.ImageField()
-    date = models.DateField(null=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-    lnglat = models.CharField(max_length=50, blank=True, null=True)
-
-    @property
-    def lng(self):
-        if self.lnglat:
-            return self.lnglat.split(',')[0]
-
-    @property
-    def lat(self):
-        if self.lnglat:
-            return self.lnglat.split(',')[1]
+class Post(models.Model):
+    author = models.ForeignKey('auth.User')
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.title
 
-class Activity(models.Model):
-    name = models.CharField(max_length=100)
-    content = models.TextField()
-    photo = models.ImageField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    link = models.URLField(max_length=200)
+class Comment(models.Model):
+    post = models.ForeignKey(Post)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL)
+    message = models.TextField()
+
+    def get_absolute_url(self):
+        return reverse('blog:post_detail', args=[self.post_id])
+
 
 
